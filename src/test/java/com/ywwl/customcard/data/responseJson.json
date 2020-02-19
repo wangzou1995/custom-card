@@ -1,0 +1,37 @@
+{
+  "code": 1,
+  "msg": "成功",
+  "data": [
+    {
+      "companyCode": "01",
+      "effectTime": "2019-01-01",
+      "productCodes": [
+        {
+          "productCode": "101",
+          "productName": "测试产品",
+          "serviceType": "经济",
+          "weights": [
+            {
+              "startWeight": 0.01,
+              "endWeight": 2.00,
+              "countries": [
+                {
+                  "countryCode": 123,
+                  "countryName": "美国",
+                  "price": 25,
+                  "processPrice": 2.0
+                },
+                {
+                  "countryCode": 124,
+                  "countryName": "英国",
+                  "price": 25,
+                  "processPrice": 2.0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

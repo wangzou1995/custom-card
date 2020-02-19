@@ -1,0 +1,12 @@
+logging:
+  config: classpath:logback.xml
+spring:
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: "jdbc:sqlserver://localhost:10000;database=ERP"
+    username: sap
+    password: 1234
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+configuration:
+  log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

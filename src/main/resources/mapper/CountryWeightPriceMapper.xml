@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ywwl.customcard.mapper.CountryWeightPriceDao">
+    <select id="selectMessageByEffectTime" parameterType="com.ywwl.customcard.model.QueryPriceParam"  resultType="java.util.HashMap">
+        SELECT
+        U_CountryID AS countryCode,
+        U_weightFrom as startWeight,
+        U_weightTo as endWeight,
+        U_P1 AS p1,
+        U_G1 AS g1,
+        U_P2 AS p2,
+        U_G2 AS g2,
+        U_P3 AS p3,
+        U_G3 AS g3,
+        U_P4 AS p4,
+        U_G4 AS g4,
+        U_P5 AS p5,
+        U_G5 AS g5,
+        U_P6 AS p6,
+        U_G6 AS g6,
+        U_P7 AS p7,
+        U_G7 AS g7,
+        U_P8 AS p8,
+        U_G8 AS g8
+        FROM [@PRICE01DETAIL]
+        where U_StartTime &lt;= #{effectTime}
+        and   ISNULL(U_EndTime,#{effectTime}) &gt;= #{effectTime}
+        and   code = #{code}
+        and  U_CountryID in
+        <foreach collection="countryModels" item="countryModel" separator="," open="(" close=")">
+            #{countryModel.countryCode}
+        </foreach>
+    </select>
+</mapper>

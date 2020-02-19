@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: cpc
+  gson:
+    date-format: yyyy-MM-dd
+  profiles:
+    active: dev
+server:
+  port: 8080
