@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ywwl.customcard.mapper.CountryWeightPriceDao">
+    <resultMap id="lineMap" type="com.ywwl.customcard.model.LinePriceModel">
+        <result column="companyFrom" property="companyFrom" />
+        <collection property="lineDetailPrices" ofType="com.ywwl.customcard.model.LineDetailPrice">
+            <result column="companyTo" property="companyTo"/>
+            <result column="priceCode" property="priceCode"/>
+            <result column="productCode" property="productCode"/>
+            <result column="priceType" property="priceType"/>
+            <result column="linePrice" property="linePrice"/>
+            <result column="parentPriceCode" property="parentPriceCode" />
+            <result column="parentPriceType" property="parentPriceType" />
+            <result column="countryCode" property="countryCode"/>
+        </collection>
+    </resultMap>
     <select id="selectMessageByEffectTime" parameterType="com.ywwl.customcard.model.QueryPriceParam"  resultType="java.util.HashMap">
         SELECT
         U_CountryID AS countryCode,
@@ -30,5 +43,187 @@
         <foreach collection="countryModels" item="countryModel" separator="," open="(" close=")">
             #{countryModel.countryCode}
         </foreach>
+    </select>
+    <select id="selectLineMessage" parameterType="com.ywwl.customcard.model.QueryLinePriceParam"  resultMap="lineMap">
+        SELECT
+        t0.U_WareHouseFrom AS companyFrom,
+        t0.U_WareHouseOfPort AS companyTo,
+        t0.U_ProductCode AS productCode,
+        null as parentPriceCode,
+        null as parentPriceType,
+        t0.U_PortPrice AS priceCode,
+        t3.U_PriceUDO AS priceType,
+        t1.U_Price AS linePrice,
+        null as countryCode,
+        MAX ( t0.U_StartDate ) routeTime
+        FROM
+        dbo.[@PRICEROUTING] t0
+        LEFT JOIN (
+        SELECT
+        U_WareHouseFrom,
+        U_WareHouseOfPort,
+        code,
+        U_Price,
+        MAX ( U_StartTime ) AS max_time
+        FROM
+        dbo.[@PRICETFDETAIL]
+        WHERE
+        U_StartTime &lt;= #{effectTime}
+        AND isnull( U_EndTime, #{effectTime} )  &gt;= #{effectTime}
+        GROUP BY
+        U_WareHouseFrom,
+        U_WareHouseOfPort,
+        code,
+        U_Price
+        ) t1 ON t1.U_WareHouseFrom = t0.U_WareHouseFrom
+        AND t1.U_WareHouseOfPort = t0.U_WareHouseOfPort
+        AND t1.code = t0.U_TransferPrice
+        LEFT JOIN [@PRICELIST] t2 ON t2.code = t0.U_PortPrice
+        LEFT JOIN [@PRICETYPE] t3 ON t3.code = t2.U_PriceType
+        WHERE
+        t0.U_ProductCode IN
+        <foreach collection="productCodes" item="productCode" separator="," open="(" close=")">
+            #{productCode}
+        </foreach>
+        AND t0.U_StartDate &lt;= #{effectTime}
+        AND isnull( t0.U_EndDate, #{effectTime} )  &gt;= #{effectTime}
+        AND t0.U_WareHouseFrom in
+        <foreach collection="companyCodes" item="companyCode" separator="," open="(" close=")">
+            #{companyCode}
+        </foreach>
+        AND t0.U_RoutingType != 2
+        GROUP BY
+        t0.U_WareHouseFrom,
+        t0.U_WareHouseOfPort,
+        t0.U_PortPrice,
+        t1.U_Price,
+        t0.U_ProductCode,
+        t0.U_TransferPrice,
+        t1.code ,
+        t3.U_PriceUDO
+        UNION all
+
+        SELECT
+        tt1.U_WareHouseFrom AS companyFrom,
+        tt1.U_WareHouseOfPort AS companyTo,
+        tt0.productCode,
+        tt0.parentPriceCode,
+        tt0.parentPriceType,
+        tt1.U_BasePriceCode AS priceCode,
+        t3.U_PriceUDO as priceType,
+        tt1.U_price AS linePrice,
+        tt1.countryCode ,
+        null as temp
+        FROM
+        (--1.查询路由信息
+        SELECT
+        t0.U_ProductCode AS productCode,
+        t0.U_PortPrice AS parentPriceCode,
+        'Price09' AS parentPriceType,
+        MAX ( t0.U_StartDate ) AS temp
+        FROM
+        [@PRICEROUTING] t0
+        WHERE
+        t0.U_RoutingType = 2
+        AND ISNULL( t0.U_StartDate, #{effectTime} ) &lt;= #{effectTime}
+        AND ISNULL( t0.U_EndDate, #{effectTime} )  &gt;= #{effectTime}
+        AND t0.U_ProductCode IN
+        <foreach collection="productCodes" item="productCode" separator="," open="(" close=")">
+            #{productCode}
+        </foreach>
+        GROUP BY
+        t0.U_ProductCode,
+        t0.U_PortPrice
+        ) tt0
+        INNER JOIN (--2 查询09子信息
+        SELECT
+        t0.U_WareHouseFrom ,
+        t0.U_WareHouseOfPort,
+        t0.U_BasePriceCode,
+        t0.code,
+        c0.U_CountryCode AS countryCode,
+        lineprice.U_price,
+        MAX ( t0.U_StartTime ) temp
+        FROM
+        [@PRICE09DETAIL] t0
+        INNER JOIN (
+        SELECT
+        t0.code,
+        t0.U_CountryCode,
+        t0.U_ZipCode,
+        MAX ( t0.U_StartDate ) AS temp
+        FROM
+        [@PRICE09ZIPCODE] t0
+        WHERE
+        ISNULL( t0.U_StartDate, #{effectTime} ) &lt;= #{effectTime}
+        AND ISNULL( t0.U_EndDate, #{effectTime} )  &gt;= #{effectTime}
+        AND t0.U_CountryCode IN
+        <foreach collection="countryCodes" item="countryModel" separator="," open="(" close=")">
+            #{countryModel.countryCode}
+        </foreach>
+        GROUP BY
+        t0.code,
+        t0.U_CountryCode,
+        t0.U_ZipCode
+        ) c0 ON t0.code = c0.Code
+        AND t0.U_zipcode = c0.U_zipcode
+        LEFT JOIN (
+        SELECT
+        t0.code ,
+        t0.U_WareHouseFrom,
+        t0.U_WareHouseOfPort,
+        line.U_price,
+        MAX ( t0.U_StartDate ) temp
+        FROM
+        [@PRICE09TRANSFER] t0
+        LEFT JOIN (
+        SELECT
+        t0.code,
+        t0.U_WareHouseFrom,
+        t0.U_WareHouseOfPort,
+        t0.U_Price,
+        MAX ( t0.U_startTime ) AS temp
+        FROM
+        [@PRICETFDETAIL] t0
+        WHERE
+        ISNULL( t0.U_StartTime, #{effectTime} ) &lt;= #{effectTime}
+        AND ISNULL( t0.U_EndTime, #{effectTime} )  &gt;= #{effectTime}
+        GROUP BY
+        t0.code,
+        t0.U_WareHouseFrom,
+        t0.U_WareHouseOfPort,
+        t0.U_Price
+        ) AS line ON t0.U_WareHouseFrom = line.U_WareHouseFrom
+        AND t0.U_WareHouseOfPort = line.U_WareHouseOfPort
+        AND t0.U_TransferPrice = line.code
+        WHERE
+        ISNULL( t0.U_StartDate, #{effectTime} ) &lt;= #{effectTime}
+        AND ISNULL( t0.U_EndDate, #{effectTime} )  &gt;= #{effectTime}
+        GROUP BY
+        t0.code ,
+        t0.U_WareHouseFrom,
+        t0.U_WareHouseOfPort,
+        line.U_price
+        ) lineprice ON t0.code = lineprice.code
+        AND t0.U_WareHouseFrom = lineprice.U_WareHouseFrom
+        AND t0.U_WareHouseOfPort
+        = lineprice.U_WareHouseOfPort
+        WHERE
+        ISNULL( t0.U_StartTime, #{effectTime} ) &lt;= #{effectTime}
+        AND ISNULL( t0.U_EndTime, #{effectTime} )  &gt;= #{effectTime}
+        AND t0.U_WareHouseFrom IN
+         <foreach collection="companyCodes" item="companyCode" separator="," open="(" close=")">
+            #{companyCode}
+        </foreach>
+        GROUP BY
+        t0.U_WareHouseFrom ,
+        t0.U_WareHouseOfPort,
+        t0.U_BasePriceCode,
+        t0.code,
+        c0.U_CountryCode ,
+        lineprice.U_price
+        ) tt1 ON tt0.parentPriceCode = tt1.code
+        LEFT JOIN [@PRICELIST] t2 ON t2.code = tt1.U_BasePriceCode
+        LEFT JOIN [@PRICETYPE] t3 ON t3.code = t2.U_PriceType
     </select>
 </mapper>

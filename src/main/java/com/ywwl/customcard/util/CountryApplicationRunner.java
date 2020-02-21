@@ -3,6 +3,8 @@ package com.ywwl.customcard.util;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ywwl.customcard.model.CountryModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -21,7 +23,8 @@ import java.util.List;
  */
 @Component
 @Order(1)
-public class StaticSource implements ApplicationRunner {
+public class CountryApplicationRunner implements ApplicationRunner {
+    private final Logger logger = LoggerFactory.getLogger(ProductApplicationRunner.class);
     @Value("classpath:data/country.json")
     private  Resource resource;
     public  List<CountryModel> countryModels = new ArrayList<>();
@@ -39,8 +42,10 @@ public class StaticSource implements ApplicationRunner {
     }
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        BufferedReader br = null;
+        logger.info("初始化国家数据-开始");
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+            br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
             StringBuilder sb = new StringBuilder();
             String temp;
             while((temp = br.readLine()) != null) {
@@ -55,7 +60,11 @@ public class StaticSource implements ApplicationRunner {
                 countryModels.add(countryModel);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("国家数据异常");
+        } finally {
+            assert br != null;
+            br.close();
+            logger.info("初始化国家数据-成功");
         }
     }
 }
