@@ -13,6 +13,5 @@ import java.util.Map;
 @Mapper
 public interface CountryWeightPriceDao {
     List<Map<String,String>> selectMessageByEffectTime(QueryPriceParam queryPriceParam);
-
     List<LinePriceModel> selectLineMessage(QueryLinePriceParam queryLinePriceParam);
 }

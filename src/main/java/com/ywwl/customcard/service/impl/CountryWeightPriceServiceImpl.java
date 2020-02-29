@@ -46,7 +46,6 @@ public class CountryWeightPriceServiceImpl implements CountryWeightPriceService 
     private JSONArray getPriceMessage(List<LinePriceModel> lines, RequestDownloadModel requestDownloadModel) {
         QueryPriceParam qpp = (QueryPriceParam) paramFactory.getParam(ParamTypeEnum.PRICE);
         lines.parallelStream().forEach(System.out::println);
-        qpp.setCode("1035");
         qpp.setEffectTime(requestDownloadModel.getEffectTime());
         List<Map<String, String>> countryPriceModels =
                 countryWeightPriceDao.selectMessageByEffectTime(qpp);
