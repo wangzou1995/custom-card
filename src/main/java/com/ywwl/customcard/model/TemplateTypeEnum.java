@@ -20,4 +20,14 @@ public enum TemplateTypeEnum {
     public String getValue() {
         return value;
     }
+    public static TemplateTypeEnum getByValue(String s) {
+           TemplateTypeEnum [] templateTypeEnums = TemplateTypeEnum.values();
+           for( TemplateTypeEnum templateTypeEnum : templateTypeEnums) {
+               if (templateTypeEnum.getValue().equals(s)) {
+                   return templateTypeEnum;
+               }
+           }
+
+           return null;
+    }
 }

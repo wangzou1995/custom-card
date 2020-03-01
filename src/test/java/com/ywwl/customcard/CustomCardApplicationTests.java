@@ -29,7 +29,6 @@ class CustomCardApplicationTests {
         String[] companyCodes = {"01"};
         rdm.setCompanyCodes(Arrays.asList(companyCodes));
         rdm.setEffectTime("2020-01-01");
-        dcc.download(rdm);
     }
 
 }

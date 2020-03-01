@@ -4,14 +4,17 @@
     <resultMap id="lineMap" type="com.ywwl.customcard.model.LinePriceModel">
         <result column="companyFrom" property="companyFrom" />
         <collection property="lineDetailPrices" ofType="com.ywwl.customcard.model.LineDetailPrice">
-            <result column="companyTo" property="companyTo"/>
-            <result column="priceCode" property="priceCode"/>
             <result column="productCode" property="productCode"/>
-            <result column="priceType" property="priceType"/>
-            <result column="linePrice" property="linePrice"/>
-            <result column="parentPriceCode" property="parentPriceCode" />
-            <result column="parentPriceType" property="parentPriceType" />
-            <result column="countryCode" property="countryCode"/>
+            <collection property="productsPriceList" ofType="com.ywwl.customcard.model.ProductsPrice">
+                <result column="companyTo" property="companyTo"/>
+                <result column="priceCode" property="priceCode"/>
+                <result column="priceType" property="priceType"/>
+                <result column="linePrice" property="linePrice"/>
+                <result column="parentPriceCode" property="parentPriceCode" />
+                <result column="parentPriceType" property="parentPriceType" />
+                <result column="countryCode" property="countryCode"/>
+                <result column="queryTime" property="queryTime"/>
+            </collection>
         </collection>
     </resultMap>
     <select id="selectMessageByEffectTime" parameterType="com.ywwl.customcard.model.QueryPriceParam"  resultType="java.util.HashMap">
@@ -34,7 +37,8 @@
         U_P7 AS p7,
         U_G7 AS g7,
         U_P8 AS p8,
-        U_G8 AS g8
+        U_G8 AS g8,
+        max(U_StartTime) as effectTime
         FROM [@PRICE01DETAIL]
         where U_StartTime &lt;= #{effectTime}
         and   ISNULL(U_EndTime,#{effectTime}) &gt;= #{effectTime}
@@ -43,6 +47,26 @@
         <foreach collection="countryModels" item="countryModel" separator="," open="(" close=")">
             #{countryModel.countryCode}
         </foreach>
+        group by
+        U_CountryID ,
+        U_weightFrom ,
+        U_weightTo ,
+        U_P1 ,
+        U_G1 ,
+        U_P2 ,
+        U_G2 ,
+        U_P3 ,
+        U_G3 ,
+        U_P4 ,
+        U_G4 ,
+        U_P5 ,
+        U_G5 ,
+        U_P6 ,
+        U_G6 ,
+        U_P7,
+        U_G7 ,
+        U_P8,
+        U_G8
     </select>
     <select id="selectLineMessage" parameterType="com.ywwl.customcard.model.QueryLinePriceParam"  resultMap="lineMap">
         SELECT
@@ -55,7 +79,8 @@
         t3.U_PriceUDO AS priceType,
         t1.U_Price AS linePrice,
         null as countryCode,
-        MAX ( t0.U_StartDate ) routeTime
+        MAX ( t0.U_StartDate ) routeTime,
+        #{effectTime} as queryTime
         FROM
         dbo.[@PRICEROUTING] t0
         LEFT JOIN (
@@ -113,7 +138,8 @@
         t3.U_PriceUDO as priceType,
         tt1.U_price AS linePrice,
         tt1.countryCode ,
-        null as temp
+        null as temp,
+        #{effectTime} as queryTime
         FROM
         (--1.查询路由信息
         SELECT
@@ -225,5 +251,19 @@
         ) tt1 ON tt0.parentPriceCode = tt1.code
         LEFT JOIN [@PRICELIST] t2 ON t2.code = tt1.U_BasePriceCode
         LEFT JOIN [@PRICETYPE] t3 ON t3.code = t2.U_PriceType
+    </select>
+    <select id="selectWeightRangByCode" resultType="com.ywwl.customcard.model.WeightRang">
+        select distinct U_groupid as id , u_weightFrom as weightFrom , u_weightTo as weightTo from [@PRICE01WEIGHTRANG]
+where code = #{code}
+    </select>
+    <select id="selectProductMessageByCode" resultType="java.util.HashMap">
+        SELECT
+	t0.U_ProductCode AS productCode,
+	t0.U_ProductName AS productName,
+	t0.U_ServiceType AS serviceType
+FROM
+	[PRICEDIRECTORY] t0
+WHERE
+	t0.U_ProductCode = #{productCode}
     </select>
 </mapper>

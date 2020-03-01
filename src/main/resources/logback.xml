@@ -92,7 +92,7 @@
     </appender>
 
     <!-- 输出sql日志 -->
-    <logger name="com.ywwl.customcard.mapper" level="DEBUG" />
+    <logger name="com.ywwl.customcard.mapper" level="INFO" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
