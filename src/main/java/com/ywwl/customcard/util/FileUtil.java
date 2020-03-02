@@ -1,14 +1,16 @@
 package com.ywwl.customcard.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class FileUtil {
+    private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
     public static String getFilePath(){
         String folder = System.getProperty("java.io.tmpdir");
         String fileName = UUID.randomUUID().toString().replaceAll("-","");
@@ -77,5 +79,37 @@ public class FileUtil {
 
         }
         return files;
+    }
+    public static void downloadFile (String path, HttpServletResponse response) {
+        if (FileUtil.zipFiles(FileUtil.getFiles(path), new File(path + File.separator + "download.zip"))) {
+            try {
+                // path是指欲下载的文件的路径。
+                File file = new File(path + File.separator + "download.zip");
+                // 取得文件名。
+                String filename = file.getName();
+                // 取得文件的后缀名。
+                String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+                // 以流的形式下载文件。
+                InputStream fis = new BufferedInputStream(new FileInputStream(path + File.separator + "download.zip"));
+                byte[] buffer = new byte[fis.available()];
+                fis.read(buffer);
+                fis.close();
+                // 清空response
+                // 设置response的Header
+
+                response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+                response.addHeader("Content-Length", "" + file.length());
+
+                OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+                response.setContentType("application/octet-stream");
+                toClient.write(buffer);
+                toClient.flush();
+                toClient.close();
+            } catch (IOException ex) {
+                logger.error("下载失败" + ex);
+            }
+        }
+
     }
 }

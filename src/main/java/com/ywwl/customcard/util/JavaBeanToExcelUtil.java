@@ -30,11 +30,11 @@ public class JavaBeanToExcelUtil {
     private CountryApplicationRunner countryApplicationRunner;
 
 
-    public List<XSSFWorkbook> invoke(List<JSONObject> data) {
+    public List<Map<String, XSSFWorkbook>> invoke(List<JSONObject> data) {
         return data.parallelStream().map(this::createWorkbook).collect(Collectors.toList());
     }
 
-    private XSSFWorkbook createWorkbook(JSONObject jsonObject) {
+    private XSSFWorkbook getWorkbook(JSONObject jsonObject) {
         Map<XSSFWorkbook, Map<String, Short>> map = WorkBookFactory.getInstance();
         XSSFWorkbook workbook = null;
         Map<String, Short> styleMap = null;
@@ -50,7 +50,7 @@ public class JavaBeanToExcelUtil {
         Map<String, CellStyle> contextStyles = new HashMap<>();
         contextStyles.put("context", workbook.getCellStyleAt(styleMap.get("context")));
         writeContext(sheet, contextStyles, jsonObject);
-        sheet.createFreezePane(5,2,5,2);
+        sheet.createFreezePane(5, 2, 5, 2);
         return workbook;
     }
 
@@ -88,9 +88,9 @@ public class JavaBeanToExcelUtil {
                 // 写数据
                 JSONArray array = data.getJSONArray("data");
                 for (CountryModel countryModel : countryModels) {
-                    Double [] prices = getPrice(array, countryModel.getCountryCode());
-                    if (prices.length ==0) {
-                        for(int j = 0; j < 2; j++) {
+                    Double[] prices = getPrice(array, countryModel.getCountryCode());
+                    if (prices == null) {
+                        for (int j = 0; j < 2; j++) {
                             XSSFCell cell1 = dataRow.createCell(dataRow.getLastCellNum());
                             cell1.setCellValue("--");
                             cell1.setCellStyle(cellStyle);
@@ -114,9 +114,13 @@ public class JavaBeanToExcelUtil {
     private Double[] getPrice(JSONArray data, String countryCode) {
         Double[] doubles = new Double[2];
         JSONObject priceObj = findPriceByCountryCode(data, countryCode);
-        doubles[0] = priceObj.getDouble("price");
-        doubles[1] = priceObj.getDouble("fee");
-        return doubles;
+        if (priceObj == null) {
+            return null;
+        } else {
+            doubles[0] = priceObj.getDouble("price");
+            doubles[1] = priceObj.getDouble("fee");
+            return doubles;
+        }
     }
 
     private JSONObject findPriceByCountryCode(JSONArray data, String countryCode) {
@@ -180,8 +184,13 @@ public class JavaBeanToExcelUtil {
         // 设置列宽
         for (int i = 0; i < TITLES.length + countryModels.size() * 2; i++) {
             sheet.autoSizeColumn(i, true);
-            sheet.setColumnWidth(i,  i == 1 ? 7000 : 5000);
+            sheet.setColumnWidth(i, i == 1 ? 7000 : 5000);
         }
     }
 
+    private Map<String, XSSFWorkbook> createWorkbook(JSONObject e) {
+        Map<String, XSSFWorkbook> map = new HashMap<>();
+        map.put(e.getString("companyCode"), getWorkbook(e));
+        return map;
+    }
 }

@@ -31,4 +31,12 @@ class CustomCardApplicationTests {
         rdm.setEffectTime("2020-01-01");
     }
 
+    public static void main(String[] args) {
+        String [] a = new String [2];
+
+        System.out.println(a.length);
+
+        System.out.println(a[0]);
+    }
+
 }

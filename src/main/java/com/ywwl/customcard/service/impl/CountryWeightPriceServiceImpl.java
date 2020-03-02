@@ -99,6 +99,18 @@ public class CountryWeightPriceServiceImpl implements CountryWeightPriceService 
         return getLineMessage(requestDownloadModel);
     }
 
+    @Override
+    public String getCompanyNameByCode(String code) {
+        String companyName =  countryWeightPriceDao.selectCompanyNameByCode(code);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        StringBuffer sb = new StringBuffer();
+        sb.append(companyName);
+        sb.append("报价单");
+        sb.append(sdf.format(new Date()));
+        sb.append("版.xlsx");
+        return sb.toString();
+    }
+
     private QueryPriceParam getQPP(ProductsPrice productsPrice, TemplateTypeEnum templateTypeEnum) {
         QueryPriceParam qpp = (QueryPriceParam) paramFactory.getParam(ParamTypeEnum.PRICE);
         qpp.setEffectTime(productsPrice.getQueryTime());
@@ -144,7 +156,7 @@ public class CountryWeightPriceServiceImpl implements CountryWeightPriceService 
     }
 
     private JSONObject getPriceDerail(LineDetailPrice e) {
-        JSONObject jsonObject = new JSONObject(16, true);
+        JSONObject jsonObject = new JSONObject(8, true);
         jsonObject.put("productCode", e.getProductCode());
         jsonObject.put("message", countryWeightPriceDao.selectProductMessageByCode(e.getProductCode()));
         TemplateTypeEnum type = e.getProductsPriceList().size() > 1 ?
@@ -189,17 +201,24 @@ public class CountryWeightPriceServiceImpl implements CountryWeightPriceService 
                 }
         );
         // 获得新重量段
+
         List<WeightRang> weightRangs = new ArrayList<>();
         BigDecimal[] fArray = weights.toArray(new BigDecimal[weights.size()]);
-        for (int i = 1; i < fArray.length; i++) {
-            if (fArray[i].subtract(fArray[i - 1]).doubleValue() > 0.01d) {
-                WeightRang weightRang = new WeightRang();
-                weightRang.setId(i - 1);
-                weightRang.setWeightFrom(fArray[i - 1]);
-                weightRang.setWeightTo(fArray[i]);
-                weightRangs.add(weightRang);
+
+        try {
+            for (int i = 1; i < fArray.length; i++) {
+                if (fArray[i].subtract(fArray[i - 1]).doubleValue() > 0.01d) {
+                    WeightRang weightRang = new WeightRang();
+                    weightRang.setId(i - 1);
+                    weightRang.setWeightFrom(fArray[i - 1]);
+                    weightRang.setWeightTo(fArray[i]);
+                    weightRangs.add(weightRang);
+                }
             }
+        } catch (NullPointerException ex){
+            logger.error("sssss"+fArray.length);
         }
+
 
         return weightRangs.stream().map(
                 e -> {

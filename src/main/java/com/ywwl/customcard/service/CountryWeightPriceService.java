@@ -10,4 +10,5 @@ import	java.util.List;
 public interface CountryWeightPriceService {
     List<JSONObject> getMessageByEffectTime(RequestDownloadModel requestDownloadModel);
     List<LinePriceModel> getLine(RequestDownloadModel requestDownloadModel);
+    String getCompanyNameByCode(String code);
 }
