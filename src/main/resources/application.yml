@@ -4,6 +4,6 @@ spring:
   gson:
     date-format: yyyy-MM-dd
   profiles:
-    active: dev
+    active: prod
 server:
   port: 8080

@@ -14,29 +14,6 @@ import java.util.Arrays;
 @SpringBootTest
 @MapperScan("com.ywwl.customcard.mapper")
 class CustomCardApplicationTests {
-    @Autowired
-    private CountryApplicationRunner countryApplicationRunner;
-    @Autowired
-    private DownloadCardController dcc;
-    @Test
-    void contextLoads() throws IOException {
-        System.out.println(countryApplicationRunner.getCountryModels());
-    }
 
-    @Test
-    void query() {
-        RequestDownloadModel rdm = new RequestDownloadModel();
-        String[] companyCodes = {"01"};
-        rdm.setCompanyCodes(Arrays.asList(companyCodes));
-        rdm.setEffectTime("2020-01-01");
-    }
-
-    public static void main(String[] args) {
-        String [] a = new String [2];
-
-        System.out.println(a.length);
-
-        System.out.println(a[0]);
-    }
 
 }

@@ -13,12 +13,22 @@
 
 <!--  mac -->
     <!--  info 地址 -->
-    <property name="log.path" value="/Users/wangzou1995/log/customcard" />
-    <property name="log.file" value="/Users/wangzou1995/log/customcard/logback.log" />
+<!--    <property name="log.path" value="/Users/wangzou1995/log/customcard" />-->
+<!--    <property name="log.file" value="/Users/wangzou1995/log/customcard/logback.log" />-->
+
+<!--    &lt;!&ndash; errr,错误路径 &ndash;&gt;-->
+<!--    <property name="log.path.error" value="/Users/wangzou1995/log/customcard/error/" />-->
+<!--    <property name="log.file.error" value="/Users/wangzou1995/log/customcard/error/logback-error.log" />-->
+<!--    <include resource="org/springframework/boot/logging/logback/base.xml"/>-->
+
+
+    <!--  info 地址 -->
+    <property name="log.path" value="/usr/local/service/customcard/log" />
+    <property name="log.file" value="/usr/local/service/customcard/log/logback.log" />
 
     <!-- errr,错误路径 -->
-    <property name="log.path.error" value="/Users/wangzou1995/log/customcard/error/" />
-    <property name="log.file.error" value="/Users/wangzou1995/log/customcard/error/logback-error.log" />
+    <property name="log.path.error" value="/usr/local/service/customcard/log" />
+    <property name="log.file.error" value="/usr/local/service/customcard/log/logback-error.log" />
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
 
     <!-- 普通日志 -->
