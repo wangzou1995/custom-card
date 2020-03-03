@@ -267,6 +267,6 @@ WHERE
 	t0.U_ProductCode = #{productCode}
     </select>
     <select id="selectCompanyNameByCode" resultType="String">
-        select U_CompanyName as name from [@COMPANY] where code = #{code}
+        select name  from [@WAREHOUSE] where code = #{code}
     </select>
 </mapper>

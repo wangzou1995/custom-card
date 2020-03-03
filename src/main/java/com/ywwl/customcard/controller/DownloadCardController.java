@@ -28,12 +28,12 @@ public class DownloadCardController {
     @Autowired
     private JavaBeanToExcelUtil javaBeanToExcelUtil;
 
-    @PostMapping(value = "/line")
+    @PostMapping(value = "/getLine")
     public List<LinePriceModel> getLine(@Valid @RequestBody RequestDownloadModel requestDownloadModel) {
         return countryWeightPriceService.getLine(requestDownloadModel);
     }
 
-    @PostMapping(value = "/test")
+    @PostMapping(value = "/getPrice")
     public List<JSONObject> test(@Valid @RequestBody RequestDownloadModel requestDownloadModel) {
         return countryWeightPriceService.getMessageByEffectTime(requestDownloadModel);
     }
