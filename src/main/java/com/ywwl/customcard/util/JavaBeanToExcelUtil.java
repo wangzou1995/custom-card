@@ -26,6 +26,7 @@ public class JavaBeanToExcelUtil {
     };
     private static final String PRICE_STR = "价格(元/KG)";
     private static final String FEE_STR = "处理费(元/件)";
+    private static final String SHEET_NAME = "报价单";
     @Autowired
     private CountryApplicationRunner countryApplicationRunner;
 
@@ -43,7 +44,7 @@ public class JavaBeanToExcelUtil {
             styleMap = map.get(wk);
         }
         assert workbook != null;
-        XSSFSheet sheet = workbook.createSheet();
+        XSSFSheet sheet = workbook.createSheet(SHEET_NAME);
         CellStyle cellStyle = workbook.getCellStyleAt(styleMap.get("title"));
         writeTitle(sheet, cellStyle);
 

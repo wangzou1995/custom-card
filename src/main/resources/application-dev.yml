@@ -1,5 +1,5 @@
 logging:
-  config: classpath:logback-mac.xml
+  config: classpath:logback.xml
 spring:
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver

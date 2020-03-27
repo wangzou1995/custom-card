@@ -69,6 +69,7 @@
         U_G8
     </select>
     <select id="selectLineMessage" parameterType="com.ywwl.customcard.model.QueryLinePriceParam"  resultMap="lineMap">
+        select ttt1.* from (
         SELECT
         t0.U_WareHouseFrom AS companyFrom,
         t0.U_WareHouseOfPort AS companyTo,
@@ -94,7 +95,7 @@
         dbo.[@PRICETFDETAIL]
         WHERE
         U_StartTime &lt;= #{effectTime}
-        AND isnull( U_EndTime, #{effectTime} )  &gt;= #{effectTime}
+        AND isnull( U_EndTime, #{effectTime} ) &gt;= #{effectTime}
         GROUP BY
         U_WareHouseFrom,
         U_WareHouseOfPort,
@@ -111,7 +112,7 @@
             #{productCode}
         </foreach>
         AND t0.U_StartDate &lt;= #{effectTime}
-        AND isnull( t0.U_EndDate, #{effectTime} )  &gt;= #{effectTime}
+        AND isnull( t0.U_EndDate, #{effectTime} ) &gt;= #{effectTime}
         AND t0.U_WareHouseFrom in
         <foreach collection="companyCodes" item="companyCode" separator="," open="(" close=")">
             #{companyCode}
@@ -152,7 +153,7 @@
         WHERE
         t0.U_RoutingType = 2
         AND ISNULL( t0.U_StartDate, #{effectTime} ) &lt;= #{effectTime}
-        AND ISNULL( t0.U_EndDate, #{effectTime} )  &gt;= #{effectTime}
+        AND ISNULL( t0.U_EndDate, #{effectTime} ) &gt;= #{effectTime}
         AND t0.U_ProductCode IN
         <foreach collection="productCodes" item="productCode" separator="," open="(" close=")">
             #{productCode}
@@ -182,7 +183,7 @@
         [@PRICE09ZIPCODE] t0
         WHERE
         ISNULL( t0.U_StartDate, #{effectTime} ) &lt;= #{effectTime}
-        AND ISNULL( t0.U_EndDate, #{effectTime} )  &gt;= #{effectTime}
+        AND ISNULL( t0.U_EndDate, #{effectTime} ) &gt;= #{effectTime}
         AND t0.U_CountryCode IN
         <foreach collection="countryCodes" item="countryModel" separator="," open="(" close=")">
             #{countryModel.countryCode}
@@ -213,7 +214,7 @@
         [@PRICETFDETAIL] t0
         WHERE
         ISNULL( t0.U_StartTime, #{effectTime} ) &lt;= #{effectTime}
-        AND ISNULL( t0.U_EndTime, #{effectTime} )  &gt;= #{effectTime}
+        AND ISNULL( t0.U_EndTime, #{effectTime} ) &gt;= #{effectTime}
         GROUP BY
         t0.code,
         t0.U_WareHouseFrom,
@@ -224,7 +225,7 @@
         AND t0.U_TransferPrice = line.code
         WHERE
         ISNULL( t0.U_StartDate, #{effectTime} ) &lt;= #{effectTime}
-        AND ISNULL( t0.U_EndDate, #{effectTime} )  &gt;= #{effectTime}
+        AND ISNULL( t0.U_EndDate, #{effectTime} ) &gt;= #{effectTime}
         GROUP BY
         t0.code ,
         t0.U_WareHouseFrom,
@@ -236,9 +237,9 @@
         = lineprice.U_WareHouseOfPort
         WHERE
         ISNULL( t0.U_StartTime, #{effectTime} ) &lt;= #{effectTime}
-        AND ISNULL( t0.U_EndTime, #{effectTime} )  &gt;= #{effectTime}
+        AND ISNULL( t0.U_EndTime, #{effectTime} ) &gt;= #{effectTime}
         AND t0.U_WareHouseFrom IN
-         <foreach collection="companyCodes" item="companyCode" separator="," open="(" close=")">
+        <foreach collection="companyCodes" item="companyCode" separator="," open="(" close=")">
             #{companyCode}
         </foreach>
         GROUP BY
@@ -251,6 +252,8 @@
         ) tt1 ON tt0.parentPriceCode = tt1.code
         LEFT JOIN [@PRICELIST] t2 ON t2.code = tt1.U_BasePriceCode
         LEFT JOIN [@PRICETYPE] t3 ON t3.code = t2.U_PriceType
+        ) ttt1
+        order by CHARINDEX(ttt1.productCode,'438,457,526, 527,437,456,444,445,481,484')
     </select>
     <select id="selectWeightRangByCode" resultType="com.ywwl.customcard.model.WeightRang">
         select distinct U_groupid as id , u_weightFrom as weightFrom , u_weightTo as weightTo from [@PRICE01WEIGHTRANG]

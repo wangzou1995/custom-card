@@ -3,13 +3,16 @@ package com.ywwl.customcard.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.ywwl.customcard.model.LinePriceModel;
 import com.ywwl.customcard.model.RequestDownloadModel;
+import com.ywwl.customcard.model.RetResult;
 import com.ywwl.customcard.service.CountryWeightPriceService;
 import com.ywwl.customcard.util.FileUtil;
 import com.ywwl.customcard.util.JavaBeanToExcelUtil;
+import com.ywwl.customcard.util.RetResponse;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,18 +32,18 @@ public class DownloadCardController {
     private JavaBeanToExcelUtil javaBeanToExcelUtil;
 
     @PostMapping(value = "/getLine")
-    public List<LinePriceModel> getLine(@Valid @RequestBody RequestDownloadModel requestDownloadModel) {
-        return countryWeightPriceService.getLine(requestDownloadModel);
+    public RetResult<List<LinePriceModel>> getLine(@Valid @RequestBody RequestDownloadModel requestDownloadModel) {
+        return RetResponse.makeOKRsp(countryWeightPriceService.getLine(requestDownloadModel));
     }
 
     @PostMapping(value = "/getPrice")
-    public List<JSONObject> test(@Valid @RequestBody RequestDownloadModel requestDownloadModel) {
-        return countryWeightPriceService.getMessageByEffectTime(requestDownloadModel);
+    public RetResult<List<JSONObject>> test(@Valid @RequestBody RequestDownloadModel requestDownloadModel) {
+        return RetResponse.makeOKRsp(countryWeightPriceService.getMessageByEffectTime(requestDownloadModel));
     }
-
+    @CrossOrigin
     @PostMapping(value = "/download")
     public void download(@Valid @RequestBody RequestDownloadModel requestDownloadModel, HttpServletResponse response) {
-        List<Map<String, XSSFWorkbook>> workbooks = javaBeanToExcelUtil.invoke(test(requestDownloadModel));
+        List<Map<String, XSSFWorkbook>> workbooks = javaBeanToExcelUtil.invoke(countryWeightPriceService.getMessageByEffectTime(requestDownloadModel));
         String path = FileUtil.getFilePath();
         workbooks.parallelStream().forEach(e -> {
                     try {

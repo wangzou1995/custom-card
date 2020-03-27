@@ -194,29 +194,30 @@ public class CountryWeightPriceServiceImpl implements CountryWeightPriceService 
      */
     private List<JSONObject> resetWeightMessage(List<JSONObject> list) {
         Set<BigDecimal> weights = new TreeSet<>();
-        list.parallelStream().forEach(
+        list.forEach(
                 e -> {
-                    weights.add(e.getBigDecimal("weightFrom"));
-                    weights.add(e.getBigDecimal("weightTo"));
+                        weights.add(e.getBigDecimal("weightFrom"));
+                        weights.add(e.getBigDecimal("weightTo"));
                 }
         );
         // 获得新重量段
 
         List<WeightRang> weightRangs = new ArrayList<>();
-        BigDecimal[] fArray = weights.toArray(new BigDecimal[weights.size()]);
-
-        try {
-            for (int i = 1; i < fArray.length; i++) {
-                if (fArray[i].subtract(fArray[i - 1]).doubleValue() > 0.01d) {
-                    WeightRang weightRang = new WeightRang();
-                    weightRang.setId(i - 1);
-                    weightRang.setWeightFrom(fArray[i - 1]);
-                    weightRang.setWeightTo(fArray[i]);
-                    weightRangs.add(weightRang);
+        if (weights.size() > 0) {
+            List<BigDecimal> fList = new ArrayList<>(weights);
+            try {
+                for (int i = 1; i < fList.size(); i++) {
+                    if (fList.get(i).subtract(fList.get(i - 1)).doubleValue() > 0.01d) {
+                        WeightRang weightRang = new WeightRang();
+                        weightRang.setId(i - 1);
+                        weightRang.setWeightFrom(fList.get(i - 1));
+                        weightRang.setWeightTo(fList.get(i));
+                        weightRangs.add(weightRang);
+                    }
                 }
+            } catch (NullPointerException ex){
+                logger.error("重量段异常"+fList.size());
             }
-        } catch (NullPointerException ex){
-            logger.error("sssss"+fArray.length);
         }
 
 

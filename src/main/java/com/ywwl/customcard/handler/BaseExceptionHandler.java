@@ -1,7 +1,9 @@
 package com.ywwl.customcard.handler;
 
-import com.alibaba.fastjson.JSONObject;
+import com.ywwl.customcard.model.RetResult;
+import com.ywwl.customcard.util.RetResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,19 +17,17 @@ public class BaseExceptionHandler {
 
     /**
      * 用于处理通用异常
+     * @return
      */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public JSONObject bindException(MethodArgumentNotValidException e) {
+    public RetResult<Object> bindException(MethodArgumentNotValidException e) {
         BindingResult bindingResult = e.getBindingResult();
-        String errorMesssage = "请求报文异常";
-        JSONObject object = new JSONObject();
+        StringBuilder errorMesssage = new StringBuilder("请求报文异常 ");
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
-            errorMesssage += fieldError.getDefaultMessage() + ", ";
+            errorMesssage.append(fieldError.getDefaultMessage()).append(", ");
         }
-        object.put("code", -1);
-        object.put("message", errorMesssage);
-        object.put("data", null);
-        return object;
+        errorMesssage.delete(errorMesssage.length()-2,errorMesssage.length()-1);
+        return RetResponse.makeRsp(HttpStatus.BAD_REQUEST.value(), errorMesssage.toString());
     }
 }
