@@ -111,6 +111,11 @@ public class CountryWeightPriceServiceImpl implements CountryWeightPriceService 
         return sb.toString();
     }
 
+    @Override
+    public List<LinePriceModel> getWishLine(RequestWISHModel requestWISHModel) {
+        return null;
+    }
+
     private QueryPriceParam getQPP(ProductsPrice productsPrice, TemplateTypeEnum templateTypeEnum) {
         QueryPriceParam qpp = (QueryPriceParam) paramFactory.getParam(ParamTypeEnum.PRICE);
         qpp.setEffectTime(productsPrice.getQueryTime());
