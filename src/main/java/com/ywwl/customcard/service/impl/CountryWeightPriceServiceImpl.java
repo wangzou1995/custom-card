@@ -146,6 +146,11 @@ public class CountryWeightPriceServiceImpl implements CountryWeightPriceService 
         queryLinePriceParam.setCompanyCodes(requestDownloadModel.getCompanyCodes());
         return countryWeightPriceDao.selectLineMessage(queryLinePriceParam);
     }
+    private List<LinePriceModel> getWISHLineMessage(RequestWISHModel requestWISHModel){
+        QueryLinePriceParam queryLinePriceParam = (QueryLinePriceParam) paramFactory.getParam(ParamTypeEnum.ROUTE);
+        queryLinePriceParam.setEffectTime(requestWISHModel.getEffectTime());
+        return countryWeightPriceDao.selectLineMessage(queryLinePriceParam);
+    }
 
     /**
      * 组装价格明细数据

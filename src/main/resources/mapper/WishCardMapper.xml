@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ywwl.customcard.mapper.WishCardDao">
+    <select id="nativeExecuteSQL" parameterType="String"
+            resultType="java.util.LinkedHashMap">
+         <![CDATA[
+        ${sql}
+        ]]>
+	</select>
+
+    <select id="selectWeightRangByCode" resultType="Integer">
+        /**查询报价单重量段**/
+        SELECT t1.U_WeightRang AS 'weightRang'
+        FROM    dbo.[@PRICE01] t0
+	    INNER JOIN dbo.[@PRICETYPE] t1
+	    ON t0.U_PriceTypeId = t1.code
+        WHERE t0.code = #{code}
+    </select>
+
+    <select id="selectWishLineMessageByProductCodeAndEffectTime" resultType="java.util.HashMap">
+        /*根据产品编号，生效时间查询干线信息*/
+        select t1.*,t0.U_portPrice as priceCode, t3.U_priceUDO as priceType,t4.en_Name as channel  from dbo.[@PRICEROUTING] t0
+        left join (
+        select * from dbo.V_WishCardTFDetail  where ISNULL(U_StartTime, #{effectTime}) &lt;= #{effectTime}
+        and  ISNULL(U_EndTime, #{effectTime}) &gt;= #{effectTime} ) t1
+        on t0.U_WareHouseFrom = t1.companyFrom and t0.U_WareHouseOfPort = t1.companyTo and t0.U_TransferPrice = t1.tfCode
+        left join [@PRICELIST] t2 on t0.U_portPrice = t2.code
+        left join [@pricetype] t3 on t2.U_priceType = t3.code
+        left join [wish_enName] t4 on t0.U_ProductCode = t4.productcode
+        where ISNULL(t0.U_StartDate, #{effectTime}) &lt;= #{effectTime}
+        and  ISNULL(t0.U_EndDate, #{effectTime}) &gt;= #{effectTime}
+        and t0.U_ProductCode = #{productCode}
+		order by t1.companyFrom asc
+    </select>
+    <select id="selectPriceTypeByProductCodeAndEffectTime" resultType="String">
+        select distinct  t3.U_priceUDO from  dbo.[@PRICEROUTING] t0
+         left join [@PRICELIST] t2 on t0.U_portPrice = t2.code
+        left join [@pricetype] t3 on t2.U_priceType = t3.code
+         where ISNULL(t0.U_StartDate, #{effectTime}) &lt;= #{effectTime}
+        and  ISNULL(t0.U_EndDate, #{effectTime}) &gt;= #{effectTime}
+        and t0.U_ProductCode = #{productCode}
+    </select>
+    <select id="selectPriceTypeByCode" resultType="String">
+        select distinct  t3.U_priceUDO from [@PRICELIST] t2
+        left join [@pricetype] t3 on t2.U_priceType = t3.code
+         where  t2.code = #{code}
+    </select>
+    <select id="selectRoutingTypeByProductCodeAndEffectTime" resultType="Integer">
+       select distinct t0.U_RoutingType from dbo.[@PRICEROUTING]  t0
+           where ISNULL(t0.U_StartDate, #{effectTime}) &lt;= #{effectTime}
+        and  ISNULL(t0.U_EndDate, #{effectTime}) &gt;= #{effectTime}
+        and t0.U_ProductCode = #{productCode}
+    </select>
+    <select id="selectFileNameByProductCode" resultType="String">
+        select en_Name from [wish_enName]  where productCode = #{productCode}
+    </select>
+    <select id="selectWeightRang15ByCode" resultType="Integer">
+       select  count(distinct U_groupid ) as id from [@PRICE15WEIGHTRANG]
+        where code = #{code}
+    </select>
+
+    <select id="selectWeightRang15EntityByCode" resultType="com.ywwl.customcard.model.WeightRang">
+       select  distinct U_groupid as id , u_weightFrom as weightFrom , u_weightTo as weightTo  from [@PRICE15WEIGHTRANG]
+        where code = #{code}
+    </select>
+
+    <select id="selectWish09LineMessageByProductCodeAndEffectTime" resultType="java.util.HashMap">
+SELECT
+	t3.*,
+	t0.U_ZipCode,
+	t0.U_WareHouseOfPort,
+	t0.code,
+	t0.U_BasePriceCode as priceCode,
+	isnull(t4.U_Price,0) U_Price,
+	a3.U_priceUDO as priceType,
+	t5.en_Name as channel
+FROM
+	dbo.[@PRICE09DETAIL] t0
+	  left join [@PRICELIST] a2 on t0.U_BasePriceCode = a2.code
+        left join [@pricetype] a3 on a2.U_priceType = a3.code
+	LEFT JOIN dbo.[Wish_subpart] t3 ON t0.U_WareHouseFrom = t3.company_code
+ left join
+(
+	SELECT
+		tt0.code,
+		tt0.U_WareHouseFrom,
+		tt0.U_WareHouseOfPort,
+		tt1.U_Price
+	FROM
+		dbo.[@PRICE09TRANSFER] tt0
+		LEFT JOIN (
+		SELECT DISTINCT
+			code,
+			U_WareHouseFrom,
+			U_WareHouseOfPort,
+			U_Price
+		FROM
+			dbo.[@PRICETFDETAIL]
+		WHERE
+			ISNULL( U_StartTime, #{effectTime} ) &lt;= #{effectTime}
+			AND ISNULL( U_EndTime, #{effectTime} ) &gt;= #{effectTime}
+		) tt1 ON tt0.U_WareHouseOfPort = tt1.U_WareHouseOfPort
+		AND tt0.U_WareHouseFrom = tt1.U_WareHouseFrom
+		AND tt0.U_TransferPrice = tt1.code
+	WHERE
+		ISNULL( tt0.U_StartDate, #{effectTime} ) &lt;= #{effectTime}
+		AND ISNULL( tt0.U_EndDate, #{effectTime} ) &gt;= #{effectTime}
+	) t4 ON t0.U_WareHouseFrom = t4.U_WareHouseFrom 	AND t0.U_WareHouseOfPort = t4.U_WareHouseOfPort
+	AND t0.code = t4.code
+	full join [wish_enName] t5 on t5.productcode = #{productCode}
+WHERE
+	t0.code = (
+	SELECT DISTINCT
+		U_PortPrice
+	FROM
+		dbo.[@PRICEROUTING]
+	WHERE
+		ISNULL( U_StartDate, #{effectTime} ) &lt;= #{effectTime}
+		AND ISNULL( U_EndDate, #{effectTime} ) &gt;= #{effectTime}
+		AND U_ProductCode = #{productCode}
+	)
+	AND ISNULL( t0.U_StartTime, #{effectTime} ) &lt;= #{effectTime}
+	AND ISNULL( t0.U_EndTime, #{effectTime} ) &gt;= #{effectTime}
+ORDER BY
+	t3.company_code ASC
+    </select>
+
+    <select id="selectCountryCodes" resultType="String">
+        select  t0.U_CountryCode from dbo.[@PRICE09ZIPCODE] t0
+where t0.Code = #{pCode} and t0.U_ZipCode = #{zCode}
+and ISNULL( t0.U_StartDate, #{effectTime} ) &lt;= #{effectTime}
+		AND ISNULL( t0.U_EndDate, #{effectTime} ) &gt;= #{effectTime}
+    </select>
+
+    <select id="selectPriceType09" resultType="String">
+ select distinct  t3.U_priceUDO from [@PRICELIST] t2
+        left join [@pricetype] t3 on t2.U_priceType = t3.code
+         where  t2.code = (
+        select  top 1 U_BasePriceCode from dbo.[@PRICE09DETAIL] where code =
+        (
+        select top 1 U_PortPrice from [@PRICEROUTING] where
+        ISNULL( U_StartDate, #{effectTime} ) &lt;= #{effectTime}
+		AND ISNULL( U_EndDate, #{effectTime} ) &gt;= #{effectTime}
+		AND U_ProductCode = #{productCode})
+		AND ISNULL( U_StartTime, #{effectTime} ) &lt;= #{effectTime}
+	AND ISNULL( U_EndTime, #{effectTime} ) &gt;= #{effectTime})
+    </select>
+</mapper>
