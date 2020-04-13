@@ -63,6 +63,7 @@ public class WishCardServiceImpl implements WishCardService {
         String priceCode = stringObjectMap.get("priceCode").toString();
         String priceType = stringObjectMap.get("priceType").toString();
         String sql = getSQL(priceCode, priceType, effectTime, productCode, null);
+        logger.info("执行sql:{}",sql);
         try {
             List<Map<String, Object>> prices = wishCardDao.nativeExecuteSQL(sql);
             if (prices != null) {
@@ -88,6 +89,9 @@ public class WishCardServiceImpl implements WishCardService {
         String zipCode = stringObjectMap.get("U_ZipCode").toString();
         String priceType = wishCardDao.selectPriceTypeByCode(priceCode);
         List<String> country = wishCardDao.selectCountryCodes(parentPriceCode, zipCode, effectTime);
+        if (country == null || country.size() ==0) {
+            return null;
+        }
         String sql = getSQL(priceCode, priceType, effectTime, productCode, country);
         try {
             List<Map<String, Object>> prices = wishCardDao.nativeExecuteSQL(sql);
@@ -270,22 +274,23 @@ public class WishCardServiceImpl implements WishCardService {
                         tempMap = getWishPrice09ByLine(e, productCode, effectTime);
                         weightRangs = countryWeightPriceDao.selectWeightRangByCode(currentCode);
                     }
-                    assert tempMap != null;
-                    for (Map<String, Object> price : tempMap) {
-                        for (WeightRang weightRang : weightRangs) {
-                            Map<String, Object> priceMap = new HashMap<>(e);
-                            priceMap.put("country", price.get("countryCode"));
-                            Double minWeight = weightRang.getWeightFrom().doubleValue() == 0d ? 0 : weightRang.getWeightFrom().doubleValue() - 0.001;
-                            priceMap.put("minWeight", minWeight);
-                            priceMap.put("maxWeight", weightRang.getWeightTo().doubleValue());
-                            priceMap.put("startWeight", minWeight);
-                            priceMap.put("logisticFee", Double.parseDouble(price.get("U_P" + weightRang.getId()).toString()) +
-                                    Double.parseDouble(e.get("U_Price").toString()));
-                            priceMap.put("operationFee", price.get("U_G" + weightRang.getId()));
-                            priceMap.put("channel", e.get("channel").toString());
-                            result.add(priceMap);
-                        }
+                    if (tempMap != null && weightRangs != null) {
+                        for (Map<String, Object> price : tempMap) {
+                            for (WeightRang weightRang : weightRangs) {
+                                Map<String, Object> priceMap = new HashMap<>(e);
+                                priceMap.put("country", price.get("countryCode"));
+                                Double minWeight = weightRang.getWeightFrom().doubleValue() == 0d ? 0 : weightRang.getWeightFrom().doubleValue() - 0.001;
+                                priceMap.put("minWeight", minWeight);
+                                priceMap.put("maxWeight", weightRang.getWeightTo().doubleValue());
+                                priceMap.put("startWeight", minWeight);
+                                priceMap.put("logisticFee", Double.parseDouble(price.get("U_P" + weightRang.getId()).toString()) +
+                                        Double.parseDouble(e.get("U_Price").toString()));
+                                priceMap.put("operationFee", price.get("U_G" + weightRang.getId()));
+                                priceMap.put("channel", e.get("channel").toString());
+                                result.add(priceMap);
+                            }
 
+                        }
                     }
                     // 获取重量段信息
                     tempCode = currentCode;
@@ -309,7 +314,7 @@ public class WishCardServiceImpl implements WishCardService {
                     for (Map<String, Object> price : tempMap) {
                         Map<String, Object> priceMap = new HashMap<>(e);
                         priceMap.put("country", price.get("countryCode"));
-                        Double linePrice = Double.parseDouble(price.get("U_Price").toString());
+                        Double linePrice = Double.parseDouble(e.get("U_Price").toString());
                         priceMap.put("minWeight", 0.0);
                         priceMap.put("maxWeight", Double.parseDouble(price.get("maxWeight").toString()));
                         Double startWeight = Double.parseDouble(price.get("startWeight").toString());

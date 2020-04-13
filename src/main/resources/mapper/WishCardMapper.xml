@@ -20,7 +20,7 @@
     <select id="selectWishLineMessageByProductCodeAndEffectTime" resultType="java.util.HashMap">
         /*根据产品编号，生效时间查询干线信息*/
         select t1.*,t0.U_portPrice as priceCode, t3.U_priceUDO as priceType,t4.en_Name as channel  from dbo.[@PRICEROUTING] t0
-        left join (
+        inner join (
         select * from dbo.V_WishCardTFDetail  where ISNULL(U_StartTime, #{effectTime}) &lt;= #{effectTime}
         and  ISNULL(U_EndTime, #{effectTime}) &gt;= #{effectTime} ) t1
         on t0.U_WareHouseFrom = t1.companyFrom and t0.U_WareHouseOfPort = t1.companyTo and t0.U_TransferPrice = t1.tfCode
@@ -78,7 +78,7 @@ FROM
 	dbo.[@PRICE09DETAIL] t0
 	  left join [@PRICELIST] a2 on t0.U_BasePriceCode = a2.code
         left join [@pricetype] a3 on a2.U_priceType = a3.code
-	LEFT JOIN dbo.[Wish_subpart] t3 ON t0.U_WareHouseFrom = t3.company_code
+	inner JOIN dbo.[Wish_subpart] t3 ON t0.U_WareHouseFrom = t3.company_code
  left join
 (
 	SELECT

@@ -9,10 +9,4 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 @MapperScan("com.ywwl.customcard.mapper")
 public class WishServiceTest {
-    @Autowired
-    private WishCardService wishCardService;
-    @Test
-    public void Test() {
-        wishCardService.getWishCardPrice("566","2020-04-04");
-    }
 }

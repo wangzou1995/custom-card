@@ -1,11 +1,13 @@
 package com.ywwl.customcard.mapper;
+import	java.lang.annotation.Retention;
 
 
 import com.ywwl.customcard.model.LinePriceModel;
 import com.ywwl.customcard.model.QueryLinePriceParam;
 import com.ywwl.customcard.model.QueryPriceParam;
 import com.ywwl.customcard.model.WeightRang;
-import org.apache.ibatis.annotations.Mapper;
+
+import org.springframework.stereotype.Repository;
 
 
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.Map;
 /**
  * 国家重量价格Dao
  */
-@Mapper
+@Repository
 public interface CountryWeightPriceDao {
     /**
      * 获取价格信息

@@ -3,10 +3,11 @@ package com.ywwl.customcard.mapper;
 import com.ywwl.customcard.model.WeightRang;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
-@Mapper
+@Repository
 public interface WishCardDao {
     /***
      * 自定义SQL执行
