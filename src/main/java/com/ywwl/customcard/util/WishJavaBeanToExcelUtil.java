@@ -44,6 +44,14 @@ public class WishJavaBeanToExcelUtil {
     };
 
 
+    private static String[] DS_PT01T = {"物流渠道","发货网点","网点id","目的国国家id","目的国国家名称","目的地国家","参考时效（存储格式 x,y）",
+            "Min Weight(Kg) 重量（起始值）","Max Weight (Kg) 重量（最大值）","Starting Weight(Kg) 首重","Shipping Fee(/Kg) 每kg单价"
+            ,"Processing Fee(/package)每件操作费"
+    };
+    private static String[]  DS_PT01T_KEY = {"channel","companyName","companyId","countryId","countryName","countryCode","aging","minWeight","maxWeight","startWeight",
+            "logisticFee","operationFee"
+    };
+
     public static SXSSFWorkbook getWorkBook (List<Map<String, Object>> price, String priceType) {
         Map<Integer, CellStyle> styleMap = new HashMap<>();
         SXSSFWorkbook workbook = new SXSSFWorkbook();
@@ -62,7 +70,18 @@ public class WishJavaBeanToExcelUtil {
         }
         return workbook;
     }
-
+    public static SXSSFWorkbook getDSWorkBook (List<Map<String, Object>> price, String priceType) {
+        Map<Integer, CellStyle> styleMap = new HashMap<>();
+        SXSSFWorkbook workbook = new SXSSFWorkbook();
+        initCellStyle(workbook,styleMap);
+        switch (priceType) {
+            case "price01":
+            case "price08":
+                getDSWorkBook(styleMap, price, workbook, DS_PT01T, DS_PT01T_KEY);
+                break;
+        }
+        return workbook;
+    }
     public static void  getWorkBook(Map<Integer, CellStyle> styleMap,List<Map<String, Object>> price, SXSSFWorkbook workbook,String [] titles,String [] keys) {
         SXSSFSheet sheet = workbook.createSheet();
         // 画标题
@@ -102,7 +121,43 @@ public class WishJavaBeanToExcelUtil {
             }
         });
     }
+    public static void  getDSWorkBook(Map<Integer, CellStyle> styleMap,List<Map<String, Object>> price, SXSSFWorkbook workbook,String [] titles,String [] keys) {
+        SXSSFSheet sheet = workbook.createSheet();
+        // 画标题
+        SXSSFRow rowTitle = sheet.createRow(sheet.getLastRowNum()== -1 ? 0 : sheet.getLastRowNum()+1);
+        for (String title: titles) {
+            SXSSFCell cell = rowTitle.createCell(rowTitle.getLastCellNum()== -1 ?0 : rowTitle.getLastCellNum());
+            cell.setCellValue(title);
+            cell.setCellStyle(styleMap.get(0));
+        }
+        // 数据
+        price.forEach( e-> {
+            SXSSFRow rowData = sheet.createRow(sheet.getLastRowNum()== -1 ? 0 : sheet.getLastRowNum()+1);
 
+            for(int i = 0; i <keys.length ; i++) {
+                String key = keys[i];
+                SXSSFCell cell1 = rowData.createCell(i);
+                if (e.containsKey(key)) {
+                    Object value = e.get(key);
+                    if (value == null) {
+                        cell1.setBlank();
+                        cell1.setCellType(CellType.BLANK);
+                    } else {
+                        if (value instanceof Double || value instanceof BigDecimal) {
+                            cell1.setCellValue(Double.parseDouble(value.toString()));
+                            cell1.setCellStyle(styleMap.get(2));
+                        } else {
+                            cell1.setCellValue(value.toString());
+                            cell1.setCellStyle(styleMap.get(1));
+                        }
+                    }
+                } else {
+                    cell1.setBlank();
+                    cell1.setCellType(CellType.BLANK);
+                }
+            }
+        });
+    }
     /**
      * 初始化excel 样式
      *

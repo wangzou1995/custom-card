@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ywwl.customcard.mapper.DSDao">
+    <select id="selectDSLineMessageByProductCodeAndEffectTime" resultType="java.util.HashMap">
+        /*根据产品编号，生效时间查询干线信息*/
+        select t1.*,t0.U_portPrice as priceCode, t3.U_priceUDO as priceType,t4.ds_code as channel  from dbo.[@PRICEROUTING] t0
+        inner join (
+        select * from dbo.V_DSCardTFDetail  where ISNULL(U_StartTime, #{effectTime}) &lt;= #{effectTime}
+        and  ISNULL(U_EndTime, #{effectTime}) &gt;= #{effectTime} ) t1
+        on t0.U_WareHouseFrom = t1.companyFrom and t0.U_WareHouseOfPort = t1.companyTo and t0.U_TransferPrice = t1.tfCode
+        left join [@PRICELIST] t2 on t0.U_portPrice = t2.code
+        left join [@pricetype] t3 on t2.U_priceType = t3.code
+        left join [tb_ds_channel] t4 on t0.U_ProductCode = t4.yw_code
+        where ISNULL(t0.U_StartDate, #{effectTime}) &lt;= #{effectTime}
+        and  ISNULL(t0.U_EndDate, #{effectTime}) &gt;= #{effectTime}
+        and t0.U_ProductCode = #{productCode}
+		order by t1.companyFrom asc
+    </select>
+    <select id="selectFileNameByProductCode" resultType="String">
+        select name from [tb_ds_channel]  where yw_code = #{productCode}
+    </select>
+
+    <select id="selectDS09LineMessageByProductCodeAndEffectTime" resultType="java.util.HashMap">
+        SELECT
+	t3.*,
+	t0.U_ZipCode,
+	t0.U_WareHouseOfPort,
+	t0.code,
+	t0.U_BasePriceCode as priceCode,
+	isnull(t4.U_Price,0) U_Price,
+	a3.U_priceUDO as priceType,
+	t5.ds_code as channel
+FROM
+	dbo.[@PRICE09DETAIL] t0
+	  left join [@PRICELIST] a2 on t0.U_BasePriceCode = a2.code
+        left join [@pricetype] a3 on a2.U_priceType = a3.code
+	inner JOIN dbo.tb_ds_company  t3 ON t0.U_WareHouseFrom = t3.yw_code
+ left join
+(
+	SELECT
+		tt0.code,
+		tt0.U_WareHouseFrom,
+		tt0.U_WareHouseOfPort,
+		tt1.U_Price
+	FROM
+		dbo.[@PRICE09TRANSFER] tt0
+		LEFT JOIN (
+		SELECT DISTINCT
+			code,
+			U_WareHouseFrom,
+			U_WareHouseOfPort,
+			U_Price
+		FROM
+			dbo.[@PRICETFDETAIL]
+		WHERE
+			ISNULL( U_StartTime, #{effectTime} ) &lt;= #{effectTime}
+			AND ISNULL( U_EndTime, #{effectTime} ) &gt;= #{effectTime}
+		) tt1 ON tt0.U_WareHouseOfPort = tt1.U_WareHouseOfPort
+		AND tt0.U_WareHouseFrom = tt1.U_WareHouseFrom
+		AND tt0.U_TransferPrice = tt1.code
+	WHERE
+		ISNULL( tt0.U_StartDate, #{effectTime} ) &lt;= #{effectTime}
+		AND ISNULL( tt0.U_EndDate, #{effectTime} ) &gt;= #{effectTime}
+	) t4 ON t0.U_WareHouseFrom = t4.U_WareHouseFrom 	AND t0.U_WareHouseOfPort = t4.U_WareHouseOfPort
+	AND t0.code = t4.code
+	 left join [tb_ds_channel] t5 on t5.yw_code = #{productCode}
+WHERE
+	t0.code = (
+	SELECT DISTINCT
+		U_PortPrice
+	FROM
+		dbo.[@PRICEROUTING]
+	WHERE
+		ISNULL( U_StartDate, #{effectTime} ) &lt;= #{effectTime}
+		AND ISNULL( U_EndDate, #{effectTime} ) &gt;= #{effectTime}
+		AND U_ProductCode = #{productCode}
+	)
+	AND ISNULL( t0.U_StartTime, #{effectTime} ) &lt;= #{effectTime}
+	AND ISNULL( t0.U_EndTime, #{effectTime} ) &gt;= #{effectTime}
+ORDER BY
+	t3.company_code ASC
+    </select>
+</mapper>

@@ -6,6 +6,7 @@ import com.ywwl.customcard.model.RequestDownloadModel;
 import com.ywwl.customcard.model.RequestWISHModel;
 import com.ywwl.customcard.model.RetResult;
 import com.ywwl.customcard.service.CountryWeightPriceService;
+import com.ywwl.customcard.service.DSService;
 import com.ywwl.customcard.service.WishCardService;
 import com.ywwl.customcard.util.FileUtil;
 import com.ywwl.customcard.util.JavaBeanToExcelUtil;
@@ -35,6 +36,8 @@ public class DownloadCardController {
     private CountryWeightPriceService countryWeightPriceService;
     @Autowired
     private WishCardService wishCardService;
+    @Autowired
+    private DSService dsService;
     @Autowired
     private JavaBeanToExcelUtil javaBeanToExcelUtil;
 
@@ -77,7 +80,23 @@ public class DownloadCardController {
         List<List<Map<String, Object>>> result = new ArrayList<>();
         List<String> productCodes =  requestWISHModel.getProductCodes();
         for (String productCode: productCodes) {
-            result.add(wishCardService.getWishCardPrice(productCode,requestWISHModel.getEffectTime()));
+            List<Map<String, Object>> list = wishCardService.getWishCardPrice(productCode,requestWISHModel.getEffectTime());
+            if (list != null && list.size() > 0) {
+                result.add(list);
+            }
+
+        }
+        return result;
+    }
+    private  List<List<Map<String, Object>>>  getDSPriceList(@RequestBody @Valid RequestWISHModel requestWISHModel) {
+        List<List<Map<String, Object>>> result = new ArrayList<>();
+        List<String> productCodes =  requestWISHModel.getProductCodes();
+        for (String productCode: productCodes) {
+            List<Map<String, Object>> list = dsService.getDSCardPrice(productCode,requestWISHModel.getEffectTime());
+            if (list != null && list.size() > 0) {
+                result.add(list);
+            }
+
         }
         return result;
     }
@@ -88,25 +107,31 @@ public class DownloadCardController {
         List<List<Map<String, Object>>> result = getWishPriceList(requestWISHModel);
         String path = FileUtil.getFilePath();
         int i = 0;
-        for(List<Map<String, Object> > paths : result) {
-            try {
-                String productCode = requestWISHModel.getProductCodes().get(i);
-                String fileName = wishCardService.getFileName(productCode);
-                String priceType = wishCardService.getPriceType(productCode,requestWISHModel.getEffectTime());
-                if (priceType.equals("price09")){
-                    priceType = wishCardService.getPriceType09(productCode,requestWISHModel.getEffectTime());
+        if (result.size() > 0) {
+            for (List<Map<String, Object>> paths : result) {
+                try {
+                    String productCode = requestWISHModel.getProductCodes().get(i);
+                    String fileName = wishCardService.getFileName(productCode);
+                    String priceType = wishCardService.getPriceType(productCode, requestWISHModel.getEffectTime());
+                    if (priceType.equals("price09")) {
+                        priceType = wishCardService.getPriceType09(productCode, requestWISHModel.getEffectTime());
+                    }
+                    SXSSFWorkbook workbook = WishJavaBeanToExcelUtil.getWorkBook(paths, priceType);
+                    workbook.write(new FileOutputStream(new File(path + File.separator + fileName)));
+                    workbook.close();
+                    i++;
+
+                } catch (IOException ex) {
+                    logger.error("写出文件异常" + ex);
+                    ex.printStackTrace();
                 }
-                SXSSFWorkbook workbook = WishJavaBeanToExcelUtil.getWorkBook(paths,priceType);
-                workbook.write(new FileOutputStream(new File(path + File.separator +fileName)));
-                workbook.close();
-                i++;
 
-            } catch (IOException ex) {
-                logger.error("写出文件异常" + ex);
             }
-
+            FileUtil.downloadFile(path, response);
+        } else {
+            logger.error("价格配置异常");
         }
-        FileUtil.downloadFile(path, response);
+
     }
     @CrossOrigin
     @PostMapping(value = "/wishCard/price")
@@ -114,5 +139,44 @@ public class DownloadCardController {
         List<List<Map<String, Object>>> result = getWishPriceList(requestWISHModel);
 
         return RetResponse.makeOKRsp(result);
+    }
+    @CrossOrigin
+    @PostMapping(value = "/dsCard/price")
+    public RetResult<List<List<Map<String, Object>>>> DSPrice(@Valid @RequestBody RequestWISHModel requestWISHModel, HttpServletResponse response) {
+        List<List<Map<String, Object>>> result = getDSPriceList(requestWISHModel);
+
+        return RetResponse.makeOKRsp(result);
+    }
+    @CrossOrigin
+    @PostMapping(value = "/dsCard/download")
+    public void dsDownload(@Valid @RequestBody RequestWISHModel requestWISHModel, HttpServletResponse response) {
+        List<List<Map<String, Object>>> result = getDSPriceList(requestWISHModel);
+        String path = FileUtil.getFilePath();
+        int i = 0;
+        if (result.size() > 0) {
+            for (List<Map<String, Object>> paths : result) {
+                try {
+                    String productCode = requestWISHModel.getProductCodes().get(i);
+                    String fileName = dsService.getFileName(productCode);
+                    String priceType = wishCardService.getPriceType(productCode, requestWISHModel.getEffectTime());
+                    if (priceType.equals("price09")) {
+                        priceType = wishCardService.getPriceType09(productCode, requestWISHModel.getEffectTime());
+                    }
+                    SXSSFWorkbook workbook = WishJavaBeanToExcelUtil.getDSWorkBook(paths, priceType);
+                    workbook.write(new FileOutputStream(new File(path + File.separator + fileName)));
+                    workbook.close();
+                    i++;
+
+                } catch (IOException ex) {
+                    logger.error("写出文件异常" + ex);
+                    ex.printStackTrace();
+                }
+
+            }
+            FileUtil.downloadFile(path, response);
+        } else {
+            logger.error("价格配置异常");
+        }
+
     }
 }

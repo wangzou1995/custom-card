@@ -1,0 +1,9 @@
+@startuml
+
+class ArrayList {
++ Object[] elementData
+- size()
+~ int size
+
+}
+@enduml

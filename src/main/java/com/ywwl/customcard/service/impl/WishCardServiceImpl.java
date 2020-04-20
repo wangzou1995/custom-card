@@ -63,7 +63,7 @@ public class WishCardServiceImpl implements WishCardService {
         String priceCode = stringObjectMap.get("priceCode").toString();
         String priceType = stringObjectMap.get("priceType").toString();
         String sql = getSQL(priceCode, priceType, effectTime, productCode, null);
-        logger.info("执行sql:{}",sql);
+//        logger.info("执行sql:{}",sql);
         try {
             List<Map<String, Object>> prices = wishCardDao.nativeExecuteSQL(sql);
             if (prices != null) {
@@ -93,6 +93,7 @@ public class WishCardServiceImpl implements WishCardService {
             return null;
         }
         String sql = getSQL(priceCode, priceType, effectTime, productCode, country);
+        logger.warn("执行sql: {}", sql);
         try {
             List<Map<String, Object>> prices = wishCardDao.nativeExecuteSQL(sql);
             if (prices != null) {
@@ -127,14 +128,14 @@ public class WishCardServiceImpl implements WishCardService {
                 for (int i = 1; i <= weightRang; i++) {
                     sb.append(",t0.U_P").append(i).append(",t0.U_G").append(i);
                 }
-                sb.append(" from dbo.[@PRICE01DETAIL] t0 left join (select * from dbo.[PRICEDIRECTORYDETAIL] where U_ProductCode = '{{productCode}}')")
+                sb.append(",t0.U_WeightFrom from dbo.[@PRICE01DETAIL] t0 left join (select * from dbo.[PRICEDIRECTORYDETAIL] where U_ProductCode = '{{productCode}}')")
                         .append(" t1  on t0.U_CountryID = t1.countryCode left join dbo.[Wish_countryCode] t2 on t0.U_CountryID = t2.id")
                         .append(" where t1.countryCode is null and  ISNULL(t0.U_StartTime, '{{effectTime}}') <='{{effectTime}}'")
                         .append(" and  ISNULL(t0.U_EndTime, '{{effectTime}}') >= '{{effectTime}}' and t0.code = '{{priceCode}}'");
             }
             break;
             case "price02":
-                sb.append("select t2.[三字码] as countryCode  ,0 as 'minWeight',t0.U_WeightTo as maxWeight  ,a0.U_WeightFirst 'startWeight' ")
+                sb.append("select t2.[三字码] as countryCode  ,0 as 'minWeight',t0.U_WeightTo as maxWeight  ,a0.U_WeightFirst as startWeight ")
                         .append(", t0.U_WeightFirstPrice as 'startFee',a0.U_WeightAdd 'weightUnit', t0.U_WeightAddPrice 'weightUnitFee' ,0 as 'operationFee'")
                         .append(" from dbo.[@PRICE02] a0 left join [dbo].[@PRICE02DETAIL] t0 on a0.Code = t0.Code")
                         .append("  left join (select * from dbo.[PRICEDIRECTORYDETAIL] where U_ProductCode = '{{productCode}}')")
@@ -282,7 +283,7 @@ public class WishCardServiceImpl implements WishCardService {
                                 Double minWeight = weightRang.getWeightFrom().doubleValue() == 0d ? 0 : weightRang.getWeightFrom().doubleValue() - 0.001;
                                 priceMap.put("minWeight", minWeight);
                                 priceMap.put("maxWeight", weightRang.getWeightTo().doubleValue());
-                                priceMap.put("startWeight", minWeight);
+                                priceMap.put("startWeight", Double.parseDouble(price.get("U_WeightFrom").toString()));
                                 priceMap.put("logisticFee", Double.parseDouble(price.get("U_P" + weightRang.getId()).toString()) +
                                         Double.parseDouble(e.get("U_Price").toString()));
                                 priceMap.put("operationFee", price.get("U_G" + weightRang.getId()));
@@ -318,6 +319,7 @@ public class WishCardServiceImpl implements WishCardService {
                         priceMap.put("minWeight", 0.0);
                         priceMap.put("maxWeight", Double.parseDouble(price.get("maxWeight").toString()));
                         Double startWeight = Double.parseDouble(price.get("startWeight").toString());
+                        priceMap.put("startWeight",startWeight );
                         priceMap.put("startFee", Double.parseDouble(price.get("startFee").toString()) + linePrice * startWeight);
                         Double weightUnit = Double.parseDouble(price.get("weightUnit").toString());
                         priceMap.put("weightUnit", Double.parseDouble(price.get("weightUnit").toString()));
