@@ -146,5 +146,4 @@ and ISNULL( t0.U_StartDate, #{effectTime} ) &lt;= #{effectTime}
 	AND ISNULL( U_EndTime, #{effectTime} ) &gt;= #{effectTime})
     </select>
 
-
 </mapper>

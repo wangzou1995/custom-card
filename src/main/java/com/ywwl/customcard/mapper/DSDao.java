@@ -24,4 +24,5 @@ public interface DSDao {
     List<Map<String, Object>> selectDS09LineMessageByProductCodeAndEffectTime(@Param("effectTime") String effectTime,
                                                                                 @Param("productCode") String productCode);
 
+    List<Map<String, Object>> selectAllProduct();
 }

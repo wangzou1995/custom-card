@@ -25,6 +25,11 @@ public class DSServiceImpl implements DSService {
     private CountryWeightPriceDao countryWeightPriceDao;
     private Logger logger = LoggerFactory.getLogger(DSServiceImpl.class);
 
+    @Override
+    public List<Map<String, Object>> getAllProduct() {
+        return dsDao.selectAllProduct();
+    }
+
     /**
      * 根据产品编号，生效日期获取价格明细
      *

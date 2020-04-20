@@ -80,4 +80,8 @@ WHERE
 ORDER BY
 	t3.company_code ASC
     </select>
+	<select id="selectAllProduct" resultType="java.util.HashMap">
+        select yw_code as productCode,name as productName from dbo.tb_ds_channel
+    </select>
+
 </mapper>

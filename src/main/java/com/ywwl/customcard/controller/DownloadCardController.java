@@ -17,10 +17,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -177,6 +174,11 @@ public class DownloadCardController {
         } else {
             logger.error("价格配置异常");
         }
-
+    }
+    @CrossOrigin
+    @GetMapping(value = "/dsCard/allProduct")
+    public RetResult<List<Map<String, Object>>> allProduct(){
+        List<Map<String,Object>> map = dsService.getAllProduct();
+        return RetResponse.makeOKRsp(map);
     }
 }
