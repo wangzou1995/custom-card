@@ -137,7 +137,8 @@ public class DSServiceImpl implements DSService {
                             tempMap = getDSPriceByLine(e, productCode, effectTime);
                         }
                     } else {
-                        tempMap = getDSPrice09ByLine(e, productCode, effectTime);
+                            tempMap = getDSPrice09ByLine(e, productCode, effectTime);
+
                     }
                     assert tempMap != null;
                     for (Map<String, Object> price : tempMap) {

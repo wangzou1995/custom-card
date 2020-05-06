@@ -11,7 +11,6 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 
 import java.util.List;
-import java.util.Map;
 
 public class WishJavaBeanToExcelUtil {
     /*
@@ -44,7 +43,7 @@ public class WishJavaBeanToExcelUtil {
     };
 
 
-    private static String[] DS_PT01T = {"物流渠道","发货网点","网点id","目的国国家id","目的国国家名称","目的地国家","参考时效（存储格式 x,y）",
+    private static String[] DS_PT01T = {"Channel 物流渠道","发货网点","网点id","目的国国家id","目的国国家名称","Ship to Country目的地国家","参考时效（存储格式 x,y）",
             "Min Weight(Kg) 重量（起始值）","Max Weight (Kg) 重量（最大值）","Starting Weight(Kg) 首重","Shipping Fee(/Kg) 每kg单价"
             ,"Processing Fee(/package)每件操作费"
     };

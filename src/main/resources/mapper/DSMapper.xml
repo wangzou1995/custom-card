@@ -3,7 +3,11 @@
 <mapper namespace="com.ywwl.customcard.mapper.DSDao">
     <select id="selectDSLineMessageByProductCodeAndEffectTime" resultType="java.util.HashMap">
         /*根据产品编号，生效时间查询干线信息*/
-        select t1.*,t0.U_portPrice as priceCode, t3.U_priceUDO as priceType,t4.ds_code as channel  from dbo.[@PRICEROUTING] t0
+        select t1.companyId,
+	t1.companyName,
+	t1.tfCode,
+	t1.companyFrom,
+	t1.companyTo,t1.U_Price,t0.U_portPrice as priceCode, t3.U_priceUDO as priceType,t4.ds_code as channel,max(t0.U_StartDate) as ssss from dbo.[@PRICEROUTING] t0
         inner join (
         select * from dbo.V_DSCardTFDetail  where ISNULL(U_StartTime, #{effectTime}) &lt;= #{effectTime}
         and  ISNULL(U_EndTime, #{effectTime}) &gt;= #{effectTime} ) t1
@@ -14,6 +18,11 @@
         where ISNULL(t0.U_StartDate, #{effectTime}) &lt;= #{effectTime}
         and  ISNULL(t0.U_EndDate, #{effectTime}) &gt;= #{effectTime}
         and t0.U_ProductCode = #{productCode}
+        	group by t0.U_portPrice , t3.U_priceUDO ,t4.ds_code  ,t1.companyId,
+	t1.companyName,
+	t1.tfCode,
+	t1.companyFrom,
+	t1.companyTo,t1.U_Price
 		order by t1.companyFrom asc
     </select>
     <select id="selectFileNameByProductCode" resultType="String">
@@ -22,7 +31,9 @@
 
     <select id="selectDS09LineMessageByProductCodeAndEffectTime" resultType="java.util.HashMap">
         SELECT
-	t3.*,
+	t3.yw_code as companyCode,
+	t3.name as companyName,
+	t3.ds_code as companyId,
 	t0.U_ZipCode,
 	t0.U_WareHouseOfPort,
 	t0.code,
@@ -78,7 +89,7 @@ WHERE
 	AND ISNULL( t0.U_StartTime, #{effectTime} ) &lt;= #{effectTime}
 	AND ISNULL( t0.U_EndTime, #{effectTime} ) &gt;= #{effectTime}
 ORDER BY
-	t3.company_code ASC
+	t3.yw_code ASC
     </select>
 	<select id="selectAllProduct" resultType="java.util.HashMap">
         select yw_code as productCode,name as productName from dbo.tb_ds_channel
