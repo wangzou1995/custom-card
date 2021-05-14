@@ -1,9 +1,9 @@
-logging:
-  config: classpath:logback-spring-mac.xml
+#logging:
+#  config: classpath:logback-spring-mac.xml
 spring:
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: "jdbc:sqlserver://localhost:10000;database=ERP"
+    url: "jdbc:sqlserver://56.56.59.16:1433;database=ERP"
     username: sap
     password: 1234
 mybatis:

@@ -62,6 +62,9 @@ public class JavaBeanToExcelUtil {
             JSONObject jo = (JSONObject) json;
             JSONArray productData = jo.getJSONArray("data");
             List<String> productMessages = getProductMessages(jo);
+            if(productData == null){
+                return;
+            }
             int weightNum = productData.size();
             int rowNum = sheet.getLastRowNum() + 1;
             XSSFRow row = sheet.createRow(rowNum);

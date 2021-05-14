@@ -42,7 +42,6 @@ public class WishCardServiceImpl implements WishCardService {
                 lineMap =
                         wishCardDao.selectWish09LineMessageByProductCodeAndEffectTime(effectTime, productCode);
             }
-
             if (lineMap == null) {
                 logger.warn("产品价格路由未配置  {}", productCode);
                 return null;

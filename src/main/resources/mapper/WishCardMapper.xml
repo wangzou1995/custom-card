@@ -129,7 +129,7 @@ ORDER BY
         select  t0.U_CountryCode from dbo.[@PRICE09ZIPCODE] t0
 where t0.Code = #{pCode} and t0.U_ZipCode = #{zCode}
 and ISNULL( t0.U_StartDate, #{effectTime} ) &lt;= #{effectTime}
-		AND ISNULL( t0.U_EndDate, #{effectTime} ) &gt;= #{effectTime}
+AND ISNULL( t0.U_EndDate, #{effectTime} ) &gt;= #{effectTime}
     </select>
 
     <select id="selectPriceType09" resultType="String">
