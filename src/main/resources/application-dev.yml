@@ -3,9 +3,9 @@
 spring:
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: "jdbc:sqlserver://56.56.59.16:1433;database=ERP"
+    url: "jdbc:sqlserver://10.10.144.52:1433;database=ERP"
     username: sap
-    password: 1234
+    password: mjgytoeMGfzOaTN2
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   configuration:
